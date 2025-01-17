@@ -56,11 +56,11 @@ class User {
       };
     }
 
-    // 초 단위
+    
     const timeDiff = (Date.now() - this.lastUpdateTime + latency) / 1000; 
-    // 예상 이동 거리 = 거속시
+    
     const distance = this.speed * timeDiff;
-    // 예상 방향
+    
     const direcitonX = this.x !== this.lastX ? Math.sign(this.x - this.lastX) : 0;
     const direcitonY = this.y !== this.lastY ? Math.sign(this.y - this.lastY) : 0;
     return {
