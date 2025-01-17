@@ -3,6 +3,6 @@ export const PACKET_TYPE_LENGTH = 1; // 패킷타입을 나타내는 1바이트 
 
 export const PACKET_TYPE = {
   PING: 3,
-  NORMAL: 1,
+  NORMAL: 3,
   LOCATION: 3,
 };
