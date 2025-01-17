@@ -2,11 +2,10 @@ import { config } from '../config/config.js';
 import { PACKET_TYPE } from '../constants/header.js';
 import { packetParser } from '../utils/parser/packetParser.js';
 import { getHandlerById } from '../handlers/index.js';
-import { getUserByDeviceId, getUserBySocket } from '../session/user.session.js';
-import { handlerError } from '../utils/error/errorHandler.js';
+import { getUserById } from '../session/user.session.js';
+import { handleError } from '../utils/error/errorHandler.js';
 import CustomError from '../utils/error/customError.js';
 import { ErrorCodes } from '../utils/error/errorCodes.js';
-import { getProtoMessages } from '../init/loadProtos.js';
 
 export const onData = (socket) => async (data) => {
   // 기존 버퍼에 새로 수신된 데이터를 추가
@@ -24,59 +23,29 @@ export const onData = (socket) => async (data) => {
     const packetType = socket.buffer.readUInt8(config.packet.totalLength);
     // 3. 패킷 전체 길이 확인 후 데이터 수신
     if (socket.buffer.length >= length) {
-      
-      if (packetType !== PACKET_TYPE.PING) {
-        console.log(`### [ onData ] length: ${length}, packetType: ${packetType}`);
-      }
-
       // 패킷 데이터를 자르고 버퍼에서 제거
-      const packet = socket.buffer.subarray(totalHeaderLength, length);
-      socket.buffer = socket.buffer.subarray(length);
+      const packet = socket.buffer.slice(totalHeaderLength, length);
+      socket.buffer = socket.buffer.slice(length);
 
       try {
         switch (packetType) {
-          case PACKET_TYPE.PING: {
-            const protoMessage = getProtoMessages();
-            const Ping = protoMessage.common.Ping;
-            const pingMessage = Ping.decode(packet);
-            const user = getUserBySocket(socket);
-            if(!user) {
-              throw new CustomError(ErrorCodes.USER_NOT_FOUND, '유저를 찾을 수 없습니다.');
-            }
-            user.handlePong(pingMessage);
-
+          case PACKET_TYPE.PING:
             break;
-          }
           case PACKET_TYPE.NORMAL:
-            const { handlerId, deviceId, payload } = packetParser(packet);
+            const { handlerId, sequence, payload, userId } = packetParser(packet);
 
-            const user = getUserByDeviceId(deviceId);
-            let userId;
-
-            if(user) {
-              userId = user.id;
-
-              console.log(
-                ' [onData getUserByDeviceId] deviceId: ',
-                deviceId,
-                ' userId =>> ',
-                userId,
-              );
-            }
+            const user = getUserById(userId);
+            
 
             const handler = getHandlerById(handlerId);
-            await handler({ socket, userId, payload });
-
-            console.log('[ packet Parser ] ======================= ');
-            console.log(`handlerId: ${handlerId}`);
-            console.log(`deviceId: ${deviceId}`);
-            console.log(`payload: ${payload}`);
-            console.log('[ packet Parser ] ======================= ');
-
-            break;
+            await handler({
+              socket,
+              userId,
+              payload,
+            });
         }
       } catch (error) {
-        handlerError(socket, error);
+        handleError(socket, error);
       }
     } else {
       // 아직 전체 패킷이 도착하지 않음

@@ -1,21 +1,18 @@
 export const packetNames = {
   common: {
     Packet: 'common.Packet',
-    Ping: 'common.Ping',
+    Ping: 'common.Ping'
   },
   initial: {
-    InitialPacket: 'initial.InitialPayload',
-  },
-  game: {
-    CreateGamePayload: 'game.CreateGamePayload',
-    JoinGamePayload: 'game.JoinGamePayload',
-    LocationUpdatePayload: 'game.LocationUpdatePayload',
+    InitialPacket: 'initial.InitialPacket',
   },
   response: {
     Response: 'response.Response',
   },
+  game: {
+    LocationUpdatePayload: 'game.LocationUpdatePayload',
+  },
   gameNotification: {
-    Start: 'gameNotification.Start', //header.js => 2
-    LocationUpdate: 'gameNotification.LocationUpdate', //header.js => 3
+    LocationUpdate: 'gameNotification.LocationUpdate',
   },
 };

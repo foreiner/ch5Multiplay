@@ -3,8 +3,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import protobuf from 'protobufjs';
 import { packetNames } from '../protobuf/packetNames.js';
-import CustomError from '../utils/error/customError.js';
-import { ErrorCodes } from '../utils/error/errorCodes.js';
 
 // 현재 파일의 절대 경로 추출
 const __filename = fileURLToPath(import.meta.url);
@@ -12,19 +10,14 @@ const __dirname = path.dirname(__filename);
 
 // 프로토파일이 있는 디렉토리 경로 설정
 const protoDir = path.join(__dirname, '../protobuf');
-
 // 주어진 디렉토리 내 모든 proto 파일을 재귀적으로 찾는 함수
 const getAllProtoFiles = (dir, fileList = []) => {
-  // dir 경로 파일 가져오기
   const files = fs.readdirSync(dir);
   files.forEach((file) => {
     const filePath = path.join(dir, file);
-    // directory인지 검사
     if (fs.statSync(filePath).isDirectory()) {
       getAllProtoFiles(filePath, fileList);
-    } 
-    //.proto 확장자만 가져오기
-    else if (path.extname(file) === '.proto') {
+    } else if (path.extname(file) === '.proto') {
       fileList.push(filePath);
     }
   });
@@ -46,12 +39,11 @@ export const loadProtos = async () => {
     await Promise.all(protoFiles.map((file) => root.load(file)));
 
     // packetNames 에 정의된 패킷들을 등록
-    for (const [packageName, types] of Object.entries(packetNames)) {
-        protoMessages[packageName] = {};
-        
-        for(const [type, typeName] of Object.entries(types)) {
-            protoMessages[packageName][type] = root.lookupType(typeName);
-        }
+    for (const [namespace, types] of Object.entries(packetNames)) {
+      protoMessages[namespace] = {};
+      for (const [type, typeName] of Object.entries(types)) {
+        protoMessages[namespace][type] = root.lookupType(typeName);
+      }
     }
 
     console.log('Protobuf 파일이 로드되었습니다.');

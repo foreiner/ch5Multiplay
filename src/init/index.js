@@ -1,24 +1,16 @@
-import pools from "../db/database.js";
-import { testAllConnections } from "../utils/db/testConnection.js";
-import { loadGameAssets } from "./assets.js";
-import { createGameSession } from "./createGameSession.js";
-import { loadProtos } from "./loadProtos.js";
+// 서버 초기화 작업
+import { loadGameAssets } from './assets.js';
+import { loadProtos } from './loadProtos.js';
 
-// 서버 시작 시 작동
 const initServer = async () => {
-    try{
-        // 게임 에셋 로드
-        await loadGameAssets();
-        // proto 파일 로드
-        await loadProtos();
-        // db 연결 테스트
-        //await testAllConnections(pools);
-        // 게임 세션 생성
-        createGameSession();
-    } catch (e) {
-        console.error('initServer Error : ', e);
-        process.exit(1);
-    }
-}
+  try {
+    await loadGameAssets();
+    await loadProtos();
+    // 다음 작업
+  } catch (e) {
+    console.error(e);
+    process.exit(1); // 오류 발생 시 프로세스 종료
+  }
+};
 
 export default initServer;
